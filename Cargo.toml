@@ -1,0 +1,10 @@
+[package]
+name = "lumescape"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+winit = "0.30"
+raw-window-handle = "0.6"
+anyhow = "1"
+wgpu = "30.0"
