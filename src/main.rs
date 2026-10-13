@@ -1,6 +1,8 @@
 #![windows_subsystem = "windows"]
 #![allow(dead_code)]
 
+use std::sync::Arc;
+
 use winit::{
     application::ApplicationHandler,
     dpi::{LogicalSize, Size::Logical},
@@ -15,7 +17,7 @@ mod renderer;
 
 #[derive(Default)]
 struct App {
-    window: Option<Window>,
+    window: Option<Arc<Window>>,
     renderer: Option<Renderer>,
 }
 
@@ -26,9 +28,9 @@ impl ApplicationHandler for App {
         attr.min_inner_size = Some(Logical(LogicalSize::new(1280.0, 720.0)));
         attr.visible = false;
 
-        let window = event_loop.create_window(attr).unwrap();
+        let window = Arc::new(event_loop.create_window(attr).unwrap());
 
-        self.renderer = Some(Renderer::new(&window).unwrap());
+        self.renderer = Some(Renderer::new(window.clone()).unwrap());
 
         window.set_visible(true);
         self.window = Some(window);
@@ -38,9 +40,15 @@ impl ApplicationHandler for App {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::RedrawRequested => {
-                let renderer = self.renderer.as_mut().unwrap();
+                if let Some(window) = self.window.as_ref() {
+                    let renderer = self.renderer.as_mut().unwrap();
 
-                renderer.draw();
+                    let size = window.inner_size();
+
+                    if size.width > 0 && size.height > 0 {
+                        renderer.draw(window.clone());
+                    }
+                }
 
                 self.window.as_ref().unwrap().request_redraw();
             }
@@ -55,7 +63,7 @@ impl ApplicationHandler for App {
                         return;
                     };
 
-                    renderer.resize(window);
+                    renderer.resize(window.clone());
                 }
             }
             _ => {}
@@ -64,6 +72,8 @@ impl ApplicationHandler for App {
 }
 
 fn main() {
+    env_logger::init();
+
     let mut app = App::default();
 
     let event_loop = EventLoop::new().unwrap();

@@ -7,4 +7,11 @@ edition = "2024"
 winit = "0.30"
 raw-window-handle = "0.6"
 anyhow = "1"
-wgpu = "30.0"
+wgpu = { version = "30.0", features = ["glsl"] }
+glam = "0.34"
+bytemuck = { version = "1", features = ["derive"] }
+noise = "0.9"
+image = "0.25"
+rayon = "1"
+env_logger = "0.11"
+pollster = "1"
